@@ -383,11 +383,39 @@ sample_player-sample_player.o: sample_player.cpp ../config.h \
  /usr/local/include/boost/function/detail/function_iterate.hpp \
  /usr/local/include/boost/function/detail/maybe_include.hpp \
  /usr/local/include/boost/function/function_template.hpp \
- /usr/local/include/boost/detail/no_exceptions_support.hpp strategy.h \
- soccer_role.h /usr/local/include/rcsc/factory.h \
- /usr/include/c++/4.7/stack /usr/include/c++/4.7/bits/stl_stack.h \
+ /usr/local/include/boost/detail/no_exceptions_support.hpp \
+ /usr/local/include/rcsc/player/soccer_action.h \
+ bhv_basic_offensive_kick.h strategy.h soccer_role.h \
+ /usr/local/include/rcsc/factory.h /usr/include/c++/4.7/stack \
+ /usr/include/c++/4.7/bits/stl_stack.h \
  /usr/local/include/rcsc/formation/formation.h \
- /usr/local/include/rcsc/formation/sample_data.h \
+ /usr/local/include/rcsc/formation/sample_data.h bhv_basic_tackle.h \
+ /usr/local/include/rcsc/action/basic_actions.h \
+ /usr/local/include/rcsc/action/arm_off.h \
+ /usr/local/include/rcsc/action/arm_point_to_point.h \
+ /usr/local/include/rcsc/action/bhv_body_neck_to_point.h \
+ /usr/local/include/rcsc/action/bhv_body_neck_to_ball.h \
+ /usr/local/include/rcsc/action/bhv_neck_body_to_point.h \
+ /usr/local/include/rcsc/action/bhv_neck_body_to_ball.h \
+ /usr/local/include/rcsc/action/body_tackle_to_point.h \
+ /usr/local/include/rcsc/action/body_turn_to_angle.h \
+ /usr/local/include/rcsc/action/body_turn_to_ball.h \
+ /usr/local/include/rcsc/action/body_turn_to_point.h \
+ /usr/local/include/rcsc/action/neck_turn_to_ball.h \
+ /usr/local/include/rcsc/action/neck_turn_to_point.h \
+ /usr/local/include/rcsc/action/neck_turn_to_relative.h \
+ /usr/local/include/rcsc/action/view_change_width.h \
+ /usr/local/include/rcsc/action/view_wide.h \
+ /usr/local/include/rcsc/action/view_normal.h \
+ /usr/local/include/rcsc/action/body_go_to_point.h \
+ /usr/local/include/rcsc/action/body_go_to_point2010.h \
+ /usr/local/include/rcsc/action/body_intercept.h \
+ /usr/local/include/rcsc/action/body_intercept2009.h \
+ /usr/local/include/rcsc/player/intercept_table.h \
+ /usr/local/include/rcsc/action/neck_turn_to_ball_or_scan.h \
+ /usr/local/include/rcsc/action/neck_turn_to_low_conf_teammate.h \
+ /usr/local/include/rcsc/common/logger.h \
+ /usr/local/include/rcsc/geom/sector_2d.h neck_offensive_intercept_neck.h \
  ../src/chain_action/field_analyzer.h \
  /usr/local/include/rcsc/geom/voronoi_diagram.h \
  /usr/local/include/rcsc/geom/voronoi_diagram_original.h \
@@ -408,39 +436,15 @@ sample_player-sample_player.o: sample_player.cpp ../config.h \
  ../src/chain_action/action_generator.h \
  ../src/chain_action/field_evaluator.h sample_field_evaluator.h \
  ../src/chain_action/predict_state.h sample_communication.h \
- keepaway_communication.h bhv_penalty_kick.h \
- /usr/local/include/rcsc/player/soccer_action.h bhv_set_play.h \
+ keepaway_communication.h bhv_penalty_kick.h bhv_set_play.h \
  bhv_set_play_kick_in.h bhv_set_play_indirect_free_kick.h \
  bhv_custom_before_kick_off.h \
  ../src/chain_action/bhv_strict_check_shoot.h view_tactical.h \
  intention_receive.h /usr/local/include/rcsc/player/soccer_intention.h \
  /usr/include/c++/4.7/queue /usr/include/c++/4.7/bits/stl_queue.h \
- /usr/local/include/rcsc/action/basic_actions.h \
- /usr/local/include/rcsc/action/arm_off.h \
- /usr/local/include/rcsc/action/arm_point_to_point.h \
- /usr/local/include/rcsc/action/bhv_body_neck_to_point.h \
- /usr/local/include/rcsc/action/bhv_body_neck_to_ball.h \
- /usr/local/include/rcsc/action/bhv_neck_body_to_point.h \
- /usr/local/include/rcsc/action/bhv_neck_body_to_ball.h \
- /usr/local/include/rcsc/action/body_tackle_to_point.h \
- /usr/local/include/rcsc/action/body_turn_to_angle.h \
- /usr/local/include/rcsc/action/body_turn_to_ball.h \
- /usr/local/include/rcsc/action/body_turn_to_point.h \
- /usr/local/include/rcsc/action/neck_turn_to_ball.h \
- /usr/local/include/rcsc/action/neck_turn_to_point.h \
- /usr/local/include/rcsc/action/neck_turn_to_relative.h \
- /usr/local/include/rcsc/action/view_change_width.h \
- /usr/local/include/rcsc/action/view_wide.h \
- /usr/local/include/rcsc/action/view_normal.h \
  /usr/local/include/rcsc/action/bhv_emergency.h \
- /usr/local/include/rcsc/action/body_go_to_point.h \
- /usr/local/include/rcsc/action/body_go_to_point2010.h \
- /usr/local/include/rcsc/action/body_intercept.h \
- /usr/local/include/rcsc/action/body_intercept2009.h \
- /usr/local/include/rcsc/player/intercept_table.h \
  /usr/local/include/rcsc/action/body_kick_one_step.h \
  /usr/local/include/rcsc/action/neck_scan_field.h \
- /usr/local/include/rcsc/action/neck_turn_to_ball_or_scan.h \
  /usr/local/include/rcsc/action/view_synch.h \
  /usr/local/include/rcsc/action/kick_table.h \
  /usr/local/include/rcsc/player/say_message_builder.h \
@@ -449,8 +453,6 @@ sample_player-sample_player.o: sample_player.cpp ../config.h \
  /usr/local/include/rcsc/common/audio_message.h \
  /usr/local/include/rcsc/player/freeform_parser.h \
  /usr/local/include/rcsc/common/basic_client.h \
- /usr/local/include/rcsc/common/logger.h \
- /usr/local/include/rcsc/geom/sector_2d.h \
  /usr/local/include/rcsc/common/player_param.h \
  /usr/local/include/rcsc/common/audio_memory.h \
  /usr/local/include/rcsc/param/param_map.h \
@@ -1679,6 +1681,10 @@ communication.h:
 
 /usr/local/include/boost/detail/no_exceptions_support.hpp:
 
+/usr/local/include/rcsc/player/soccer_action.h:
+
+bhv_basic_offensive_kick.h:
+
 strategy.h:
 
 soccer_role.h:
@@ -1692,6 +1698,62 @@ soccer_role.h:
 /usr/local/include/rcsc/formation/formation.h:
 
 /usr/local/include/rcsc/formation/sample_data.h:
+
+bhv_basic_tackle.h:
+
+/usr/local/include/rcsc/action/basic_actions.h:
+
+/usr/local/include/rcsc/action/arm_off.h:
+
+/usr/local/include/rcsc/action/arm_point_to_point.h:
+
+/usr/local/include/rcsc/action/bhv_body_neck_to_point.h:
+
+/usr/local/include/rcsc/action/bhv_body_neck_to_ball.h:
+
+/usr/local/include/rcsc/action/bhv_neck_body_to_point.h:
+
+/usr/local/include/rcsc/action/bhv_neck_body_to_ball.h:
+
+/usr/local/include/rcsc/action/body_tackle_to_point.h:
+
+/usr/local/include/rcsc/action/body_turn_to_angle.h:
+
+/usr/local/include/rcsc/action/body_turn_to_ball.h:
+
+/usr/local/include/rcsc/action/body_turn_to_point.h:
+
+/usr/local/include/rcsc/action/neck_turn_to_ball.h:
+
+/usr/local/include/rcsc/action/neck_turn_to_point.h:
+
+/usr/local/include/rcsc/action/neck_turn_to_relative.h:
+
+/usr/local/include/rcsc/action/view_change_width.h:
+
+/usr/local/include/rcsc/action/view_wide.h:
+
+/usr/local/include/rcsc/action/view_normal.h:
+
+/usr/local/include/rcsc/action/body_go_to_point.h:
+
+/usr/local/include/rcsc/action/body_go_to_point2010.h:
+
+/usr/local/include/rcsc/action/body_intercept.h:
+
+/usr/local/include/rcsc/action/body_intercept2009.h:
+
+/usr/local/include/rcsc/player/intercept_table.h:
+
+/usr/local/include/rcsc/action/neck_turn_to_ball_or_scan.h:
+
+/usr/local/include/rcsc/action/neck_turn_to_low_conf_teammate.h:
+
+/usr/local/include/rcsc/common/logger.h:
+
+/usr/local/include/rcsc/geom/sector_2d.h:
+
+neck_offensive_intercept_neck.h:
 
 ../src/chain_action/field_analyzer.h:
 
@@ -1745,8 +1807,6 @@ keepaway_communication.h:
 
 bhv_penalty_kick.h:
 
-/usr/local/include/rcsc/player/soccer_action.h:
-
 bhv_set_play.h:
 
 bhv_set_play_kick_in.h:
@@ -1767,57 +1827,11 @@ intention_receive.h:
 
 /usr/include/c++/4.7/bits/stl_queue.h:
 
-/usr/local/include/rcsc/action/basic_actions.h:
-
-/usr/local/include/rcsc/action/arm_off.h:
-
-/usr/local/include/rcsc/action/arm_point_to_point.h:
-
-/usr/local/include/rcsc/action/bhv_body_neck_to_point.h:
-
-/usr/local/include/rcsc/action/bhv_body_neck_to_ball.h:
-
-/usr/local/include/rcsc/action/bhv_neck_body_to_point.h:
-
-/usr/local/include/rcsc/action/bhv_neck_body_to_ball.h:
-
-/usr/local/include/rcsc/action/body_tackle_to_point.h:
-
-/usr/local/include/rcsc/action/body_turn_to_angle.h:
-
-/usr/local/include/rcsc/action/body_turn_to_ball.h:
-
-/usr/local/include/rcsc/action/body_turn_to_point.h:
-
-/usr/local/include/rcsc/action/neck_turn_to_ball.h:
-
-/usr/local/include/rcsc/action/neck_turn_to_point.h:
-
-/usr/local/include/rcsc/action/neck_turn_to_relative.h:
-
-/usr/local/include/rcsc/action/view_change_width.h:
-
-/usr/local/include/rcsc/action/view_wide.h:
-
-/usr/local/include/rcsc/action/view_normal.h:
-
 /usr/local/include/rcsc/action/bhv_emergency.h:
-
-/usr/local/include/rcsc/action/body_go_to_point.h:
-
-/usr/local/include/rcsc/action/body_go_to_point2010.h:
-
-/usr/local/include/rcsc/action/body_intercept.h:
-
-/usr/local/include/rcsc/action/body_intercept2009.h:
-
-/usr/local/include/rcsc/player/intercept_table.h:
 
 /usr/local/include/rcsc/action/body_kick_one_step.h:
 
 /usr/local/include/rcsc/action/neck_scan_field.h:
-
-/usr/local/include/rcsc/action/neck_turn_to_ball_or_scan.h:
 
 /usr/local/include/rcsc/action/view_synch.h:
 
@@ -1834,10 +1848,6 @@ intention_receive.h:
 /usr/local/include/rcsc/player/freeform_parser.h:
 
 /usr/local/include/rcsc/common/basic_client.h:
-
-/usr/local/include/rcsc/common/logger.h:
-
-/usr/local/include/rcsc/geom/sector_2d.h:
 
 /usr/local/include/rcsc/common/player_param.h:
 

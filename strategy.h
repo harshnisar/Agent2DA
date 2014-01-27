@@ -189,6 +189,8 @@ public:
 
     SoccerRole::Ptr createRole( const int unum,
                                 const rcsc::WorldModel & wm ) const;
+    std::string getRoleName( const int unum,
+                                const rcsc::WorldModel & wm ) const;
     PositionType getPositionType( const int unum ) const;
     rcsc::Vector2D getPosition( const int unum ) const;
 

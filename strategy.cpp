@@ -515,6 +515,36 @@ Strategy::isMarkerType( const int unum ) const
 /*!
 
  */
+
+std::string
+Strategy::getRoleName( const int unum,
+                       const WorldModel & world ) const
+{
+    const int number = roleNumber( unum );
+
+    SoccerRole::Ptr role;
+
+    if ( number < 1 || 11 < number )
+    {
+        std::cerr << __FILE__ << ": " << __LINE__
+                  << " ***ERROR*** Invalid player number " << number
+                  << std::endl;
+        return "Invalid player number";
+    }
+
+    Formation::Ptr f = getFormation( world );
+    if ( ! f )
+    {
+        std::cerr << __FILE__ << ": " << __LINE__
+                  << " ***ERROR*** faled to create role. Null formation" << std::endl;
+        return "Null formation";
+    }
+
+    const std::string role_name = f->getRoleName( number );
+
+    return role_name;
+}
+
 SoccerRole::Ptr
 Strategy::createRole( const int unum,
                       const WorldModel & world ) const

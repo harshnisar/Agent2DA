@@ -82,7 +82,6 @@ Bhv_BasicMove::execute( PlayerAgent * agent )
               )
          )
     {
-        std::cout<<"Executing intercept, player - "<<wm.self().unum()<<std::endl;
         dlog.addText( Logger::TEAM,
                       __FILE__": intercept" );
         Body_Intercept().execute( agent );
@@ -123,73 +122,4 @@ Bhv_BasicMove::execute( PlayerAgent * agent )
     }
 
     return true;
-}
-
-double 
-Bhv_BasicMove::abs(double d){
-    if (d>0.00)
-        return d;
-    else
-        return d*(-1.00);
-}
-
-Vector2D 
-Bhv_BasicMove::RoundToNearestTens(Vector2D P){
-    // This method rounds a given position to its nearest tens - for example, the rounded position for (12, -17) would be (10, -20)
-    // This helps in locating nearby holes more easily
-    double multX = 10.00;
-    double multY = 10.00;
-    if(P.x<0.00)
-        multX = -10.00;
-    if(P.y<0.00)
-        multY = -10.00;
-    int roundX = static_cast<int>((abs(P.x)+5.00)/10);
-    int roundY = static_cast<int>((abs(P.y)+5.00)/10);
-    Vector2D roundedTens = Vector2D(multX*roundX, multY*roundY);
-    //std::cout<<"Rounded Tens - "<<roundedTens<<std::endl;
-    return roundedTens;
-}
-
-bool 
-Bhv_BasicMove::isRTaHole(Vector2D P){
-    // This method is only for rounded tens
-    // Returns true iff rounded-ten point is a hole    
-    int normalX = static_cast<int>(abs(P.x)/10);
-    int normalY = static_cast<int>(abs(P.y)/10);
-    if(normalX%2==normalY%2)
-        return true;
-    else
-        return false;
-}
-
-Vector2D 
-Bhv_BasicMove::RoundToNearestHole(Vector2D P){
-    //std::cout<<"Rounding up point - "<<P<<std::endl;
-    Vector2D roundedTens = RoundToNearestTens(P);
-    if(isRTaHole(roundedTens)){
-        //std::cout<<"RT is a hole - "<<roundedTens<<std::endl;
-        return roundedTens;
-    }
-    else{
-        Vector2D roundedHole;
-        double diffX = P.x-roundedTens.x;
-        double diffY = P.y-roundedTens.y;
-            
-        if(abs(diffX)<abs(diffY)){
-            //Point closer to vertical axis of the diamond
-            if(diffY>0)
-                roundedHole = Vector2D(roundedTens.x, roundedTens.y+10);
-            else
-                roundedHole = Vector2D(roundedTens.x, roundedTens.y-10);
-        }
-        else{
-            //Point closer to horizontal axis of the diamond
-            if(diffX>0)
-                roundedHole = Vector2D(roundedTens.x+10, roundedTens.y);
-            else
-                roundedHole = Vector2D(roundedTens.x-10, roundedTens.y);
-        }
-            //std::cout<<"Rounded hole - "<<roundedHole<<std::endl;
-            return roundedHole;
-    }
 }

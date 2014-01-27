@@ -384,6 +384,38 @@ sample_player-main_player.o: main_player.cpp ../config.h sample_player.h \
  /usr/local/include/boost/function/detail/maybe_include.hpp \
  /usr/local/include/boost/function/function_template.hpp \
  /usr/local/include/boost/detail/no_exceptions_support.hpp \
+ /usr/local/include/rcsc/player/soccer_action.h \
+ bhv_basic_offensive_kick.h strategy.h soccer_role.h \
+ /usr/local/include/rcsc/factory.h /usr/include/c++/4.7/stack \
+ /usr/include/c++/4.7/bits/stl_stack.h \
+ /usr/local/include/rcsc/formation/formation.h \
+ /usr/local/include/rcsc/formation/sample_data.h bhv_basic_tackle.h \
+ /usr/local/include/rcsc/action/basic_actions.h \
+ /usr/local/include/rcsc/action/arm_off.h \
+ /usr/local/include/rcsc/action/arm_point_to_point.h \
+ /usr/local/include/rcsc/action/bhv_body_neck_to_point.h \
+ /usr/local/include/rcsc/action/bhv_body_neck_to_ball.h \
+ /usr/local/include/rcsc/action/bhv_neck_body_to_point.h \
+ /usr/local/include/rcsc/action/bhv_neck_body_to_ball.h \
+ /usr/local/include/rcsc/action/body_tackle_to_point.h \
+ /usr/local/include/rcsc/action/body_turn_to_angle.h \
+ /usr/local/include/rcsc/action/body_turn_to_ball.h \
+ /usr/local/include/rcsc/action/body_turn_to_point.h \
+ /usr/local/include/rcsc/action/neck_turn_to_ball.h \
+ /usr/local/include/rcsc/action/neck_turn_to_point.h \
+ /usr/local/include/rcsc/action/neck_turn_to_relative.h \
+ /usr/local/include/rcsc/action/view_change_width.h \
+ /usr/local/include/rcsc/action/view_wide.h \
+ /usr/local/include/rcsc/action/view_normal.h \
+ /usr/local/include/rcsc/action/body_go_to_point.h \
+ /usr/local/include/rcsc/action/body_go_to_point2010.h \
+ /usr/local/include/rcsc/action/body_intercept.h \
+ /usr/local/include/rcsc/action/body_intercept2009.h \
+ /usr/local/include/rcsc/player/intercept_table.h \
+ /usr/local/include/rcsc/action/neck_turn_to_ball_or_scan.h \
+ /usr/local/include/rcsc/action/neck_turn_to_low_conf_teammate.h \
+ /usr/local/include/rcsc/common/logger.h \
+ /usr/local/include/rcsc/geom/sector_2d.h neck_offensive_intercept_neck.h \
  /usr/local/include/rcsc/common/basic_client.h \
  /usr/include/c++/4.7/cerrno /usr/include/errno.h \
  /usr/include/i386-linux-gnu/bits/errno.h /usr/include/linux/errno.h \
@@ -1268,6 +1300,80 @@ communication.h:
 /usr/local/include/boost/function/function_template.hpp:
 
 /usr/local/include/boost/detail/no_exceptions_support.hpp:
+
+/usr/local/include/rcsc/player/soccer_action.h:
+
+bhv_basic_offensive_kick.h:
+
+strategy.h:
+
+soccer_role.h:
+
+/usr/local/include/rcsc/factory.h:
+
+/usr/include/c++/4.7/stack:
+
+/usr/include/c++/4.7/bits/stl_stack.h:
+
+/usr/local/include/rcsc/formation/formation.h:
+
+/usr/local/include/rcsc/formation/sample_data.h:
+
+bhv_basic_tackle.h:
+
+/usr/local/include/rcsc/action/basic_actions.h:
+
+/usr/local/include/rcsc/action/arm_off.h:
+
+/usr/local/include/rcsc/action/arm_point_to_point.h:
+
+/usr/local/include/rcsc/action/bhv_body_neck_to_point.h:
+
+/usr/local/include/rcsc/action/bhv_body_neck_to_ball.h:
+
+/usr/local/include/rcsc/action/bhv_neck_body_to_point.h:
+
+/usr/local/include/rcsc/action/bhv_neck_body_to_ball.h:
+
+/usr/local/include/rcsc/action/body_tackle_to_point.h:
+
+/usr/local/include/rcsc/action/body_turn_to_angle.h:
+
+/usr/local/include/rcsc/action/body_turn_to_ball.h:
+
+/usr/local/include/rcsc/action/body_turn_to_point.h:
+
+/usr/local/include/rcsc/action/neck_turn_to_ball.h:
+
+/usr/local/include/rcsc/action/neck_turn_to_point.h:
+
+/usr/local/include/rcsc/action/neck_turn_to_relative.h:
+
+/usr/local/include/rcsc/action/view_change_width.h:
+
+/usr/local/include/rcsc/action/view_wide.h:
+
+/usr/local/include/rcsc/action/view_normal.h:
+
+/usr/local/include/rcsc/action/body_go_to_point.h:
+
+/usr/local/include/rcsc/action/body_go_to_point2010.h:
+
+/usr/local/include/rcsc/action/body_intercept.h:
+
+/usr/local/include/rcsc/action/body_intercept2009.h:
+
+/usr/local/include/rcsc/player/intercept_table.h:
+
+/usr/local/include/rcsc/action/neck_turn_to_ball_or_scan.h:
+
+/usr/local/include/rcsc/action/neck_turn_to_low_conf_teammate.h:
+
+/usr/local/include/rcsc/common/logger.h:
+
+/usr/local/include/rcsc/geom/sector_2d.h:
+
+neck_offensive_intercept_neck.h:
 
 /usr/local/include/rcsc/common/basic_client.h:
 

@@ -32,7 +32,28 @@
 #include "communication.h"
 
 #include <rcsc/player/player_agent.h>
+#include <rcsc/geom/vector_2d.h>
+#include <rcsc/player/soccer_action.h>
 #include <vector>
+ #include "bhv_basic_offensive_kick.h"
+#include "strategy.h"
+
+#include "bhv_basic_tackle.h"
+
+#include <rcsc/action/basic_actions.h>
+#include <rcsc/action/body_go_to_point.h>
+#include <rcsc/action/body_intercept.h>
+#include <rcsc/action/neck_turn_to_ball_or_scan.h>
+#include <rcsc/action/neck_turn_to_low_conf_teammate.h>
+
+#include <rcsc/player/player_agent.h>
+#include <rcsc/player/debug_client.h>
+#include <rcsc/player/intercept_table.h>
+
+#include <rcsc/common/logger.h>
+#include <rcsc/common/server_param.h>
+
+#include "neck_offensive_intercept_neck.h"
 
 class SamplePlayer
     : public rcsc::PlayerAgent {
@@ -85,8 +106,51 @@ protected:
     virtual
     ActionGenerator::ConstPtr createActionGenerator() const;
 
-private:
+public:
 
+    bool mpIntransit = false;
+    rcsc::Vector2D mpTarget = rcsc::Vector2D(0,0);
+    bool IsOccupying = false;
+
+    bool executeSampleRole( rcsc::PlayerAgent * agent );
+
+    bool
+    BasicMove( rcsc::PlayerAgent * agent );
+
+    bool 
+    isKickable(rcsc::PlayerAgent * agent, int unum);
+
+    int 
+    GetBHUnum(rcsc::PlayerAgent * agent);
+
+    double 
+    abs(double d);
+
+    rcsc::Vector2D 
+    RoundToNearestTens(rcsc::Vector2D P);
+
+    bool 
+    isRTaHole(rcsc::Vector2D P);
+
+    rcsc::Vector2D 
+    RoundToNearestHole(rcsc::Vector2D P);
+
+    bool
+    AreSamePoints(rcsc::Vector2D A, rcsc::Vector2D B, double buffer);
+
+    bool
+    IsOccupied(rcsc::PlayerAgent * agent, rcsc::Vector2D target, double buffer);
+
+    void
+    DecideAndOccupyHole(rcsc::PlayerAgent * agent, int target);
+
+    void
+    OccupyHole(rcsc::Vector2D target);
+
+private:
+    double getDashPower( const rcsc::PlayerAgent * agent );
+    void doKick( rcsc::PlayerAgent * agent );
+    void doMove( rcsc::PlayerAgent * agent );
     bool doPreprocess();
     bool doShoot();
     bool doForceKick();

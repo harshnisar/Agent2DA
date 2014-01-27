@@ -38,14 +38,6 @@ public:
 
     bool execute( rcsc::PlayerAgent * agent );
 
-    double abs(double d);
-
-	rcsc::Vector2D RoundToNearestTens(rcsc::Vector2D P);
-
-	bool isRTaHole(rcsc::Vector2D P);
-
-	rcsc::Vector2D RoundToNearestHole(rcsc::Vector2D P);
-
 private:
     double getDashPower( const rcsc::PlayerAgent * agent );
 };
