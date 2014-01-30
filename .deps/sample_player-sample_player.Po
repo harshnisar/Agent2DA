@@ -446,6 +446,8 @@ sample_player-sample_player.o: sample_player.cpp ../config.h \
  /usr/local/include/rcsc/action/body_kick_one_step.h \
  /usr/local/include/rcsc/action/neck_scan_field.h \
  /usr/local/include/rcsc/action/view_synch.h \
+ /usr/local/include/rcsc/action/body_hold_ball.h \
+ /usr/local/include/rcsc/action/body_hold_ball2008.h \
  /usr/local/include/rcsc/action/kick_table.h \
  /usr/local/include/rcsc/player/say_message_builder.h \
  /usr/local/include/rcsc/common/say_message_parser.h \
@@ -1834,6 +1836,10 @@ intention_receive.h:
 /usr/local/include/rcsc/action/neck_scan_field.h:
 
 /usr/local/include/rcsc/action/view_synch.h:
+
+/usr/local/include/rcsc/action/body_hold_ball.h:
+
+/usr/local/include/rcsc/action/body_hold_ball2008.h:
 
 /usr/local/include/rcsc/action/kick_table.h:
 

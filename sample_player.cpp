@@ -60,7 +60,10 @@
 #include <rcsc/action/body_kick_one_step.h>
 #include <rcsc/action/neck_scan_field.h>
 #include <rcsc/action/neck_turn_to_ball_or_scan.h>
+#include <rcsc/action/neck_turn_to_point.h> 
 #include <rcsc/action/view_synch.h>
+#include <rcsc/action/body_hold_ball.h>
+
 
 #include <rcsc/formation/formation.h>
 #include <rcsc/action/kick_table.h>
@@ -241,12 +244,14 @@ SamplePlayer::actionImpl()
     //
     // special situations (tackle, objects accuracy, intention...)
     //
+    
     if ( doPreprocess() )
     {
         dlog.addText( Logger::TEAM,
                       __FILE__": preprocess done" );
         return;
     }
+    
 
     //
     // update action chain
@@ -302,6 +307,31 @@ SamplePlayer::actionImpl()
         return;
     }
 
+    if ( world().gameMode().type() == GameMode::KickOff_ )
+    {   
+        bool kickable = this->world().self().isKickable();
+        if ( this->world().existKickableTeammate()
+             && this->world().teammatesFromBall().front()->distFromBall()
+             < this->world().ball().distFromSelf() )
+        {
+            kickable = false;
+        }
+
+        if ( kickable )
+        {
+            //doKick( this );
+            //Body_HoldBall().execute( this );
+
+            //else
+                Body_HoldBall().execute( this );
+        }
+        else
+        {
+            doMove( this );
+        }
+        return;
+    }
+
 
     //
     // penalty kick mode
@@ -320,6 +350,86 @@ SamplePlayer::actionImpl()
     Bhv_SetPlay().execute( this );
 }
 
+bool 
+SamplePlayer::PassPlayersAvailable( PlayerAgent * agent ){
+    const WorldModel & wm = agent->world();
+
+    Vector2D myPosition = wm.self().pos();
+    Vector2D currentHole = RoundToNearestHole(myPosition);
+    Vector2D frontup = Vector2D(currentHole.x+10, currentHole.y-10);
+    Vector2D backup = Vector2D(currentHole.x-10, currentHole.y-10);
+    Vector2D frontdown = Vector2D(currentHole.x+10, currentHole.y+10);
+    Vector2D backdown = Vector2D(currentHole.x-10, currentHole.y+10);
+
+    Vector2D fronthor = Vector2D(currentHole.x+20, currentHole.y);
+    Vector2D backhor = Vector2D(currentHole.x-20, currentHole.y);
+    Vector2D upvert = Vector2D(currentHole.x, currentHole.y-20);
+    Vector2D downvert = Vector2D(currentHole.x, currentHole.y+20);
+    
+    double buffer = 1.0;
+    
+    //TODO: Can be replaced by the IsOccupied function
+    //TODO: Return true only if pass is advantageous
+    
+    for(int i=4; i<=11; i++){
+        if(wm.ourPlayer(i)!=NULL){
+            Vector2D player_pos = wm.ourPlayer(i)->pos();
+            if( AreSamePoints(player_pos, frontup, buffer)
+                //||
+                //AreSamePoints(player_pos, frontdown, buffer)||
+                //AreSamePoints(player_pos, backup, buffer)||
+                //AreSamePoints(player_pos, backdown, buffer)||
+                //AreSamePoints(player_pos, fronthor, buffer)||
+                //AreSamePoints(player_pos, backhor, buffer)||
+                //AreSamePoints(player_pos, upvert, buffer)||
+                //AreSamePoints(player_pos, downvert, buffer)
+                ){
+                std::cout<<"pass available"<<std::endl;
+                return true;
+            }
+        }
+    }
+    return false;   
+}
+
+bool
+SamplePlayer::PassToBestPlayer( PlayerAgent * agent ){
+    //std::cout<<"****************************************************************"<<std::endl;
+    //std::cout<<"****************************************************************"<<std::endl;
+    //std::cout<<"****************************************************************"<<std::endl;
+    //std::cout<<"****************************************************************"<<std::endl;
+    //std::cout<<"****************************************************************"<<std::endl;
+    //std::cout<<"****************************************************************"<<std::endl;
+
+    const WorldModel & wm = agent->world();
+
+    Vector2D myPosition = wm.self().pos();
+    Vector2D currentHole = RoundToNearestHole(myPosition);
+
+    Vector2D frontup = Vector2D(currentHole.x+10, currentHole.y-10);
+    Vector2D backup = Vector2D(currentHole.x-10, currentHole.y-10);
+    Vector2D frontdown = Vector2D(currentHole.x+10, currentHole.y+10);
+    Vector2D backdown = Vector2D(currentHole.x-10, currentHole.y+10);
+
+    Vector2D fronthor = Vector2D(currentHole.x+20, currentHole.y);
+    Vector2D backhor = Vector2D(currentHole.x-20, currentHole.y);
+    Vector2D upvert = Vector2D(currentHole.x, currentHole.y-20);
+    Vector2D downvert = Vector2D(currentHole.x, currentHole.y+20);
+    
+    double buffer = 1.0;
+    
+    for(int i=4; i<=11; i++){
+        if(wm.ourPlayer(i)!=NULL){
+            Vector2D player_pos = wm.ourPlayer(i)->pos();
+            if(AreSamePoints(player_pos, frontup, buffer)){
+                return Body_KickOneStep( frontup, ServerParam::i().ballSpeedMax() ).execute( agent );
+            }
+        }
+    }
+
+    return false;
+}
+
 bool
 SamplePlayer::executeSampleRole( PlayerAgent * agent )
 {   
@@ -333,7 +443,13 @@ SamplePlayer::executeSampleRole( PlayerAgent * agent )
 
     if ( kickable )
     {
-        doKick( agent );
+        //doKick( agent );
+        if(PassPlayersAvailable( agent ))
+            //Body_HoldBall().execute( agent );
+            PassToBestPlayer(this);
+            //Bhv_BasicOffensiveKick().execute( agent );
+        else
+            Body_HoldBall().execute( agent );
     }
     else
     {
@@ -391,13 +507,12 @@ SamplePlayer::doMove( PlayerAgent * agent )
 
 bool
 SamplePlayer::BasicMove(PlayerAgent * agent){
-    dlog.addText( Logger::TEAM,
-                  __FILE__": Bhv_BasicMove" );
 
     //-----------------------------------------------
     // tackle
+    
     if ( Bhv_BasicTackle( 0.8, 80.0 ).execute( agent ) )
-    {
+    {   
         return true;
     }
 
@@ -415,6 +530,7 @@ SamplePlayer::BasicMove(PlayerAgent * agent){
               )
          )
     {
+    
         dlog.addText( Logger::TEAM,
                       __FILE__": intercept" );
         Body_Intercept().execute( agent );
@@ -422,26 +538,35 @@ SamplePlayer::BasicMove(PlayerAgent * agent){
 
         return true;
     }
-
-    const Vector2D target_point = Strategy::i().getPosition( wm.self().unum() );
-    const double dash_power = Strategy::get_normal_dash_power( wm );
+    
+    const Vector2D target_point = Vector2D(0,0);//Strategy::i().getPosition( wm.self().int() );
+    const double dash_power = ServerParam::i().maxDashPower();//Strategy::get_normal_dash_power( wm );
 
     double dist_thr = wm.ball().distFromSelf() * 0.1;
     if ( dist_thr < 1.0 ) dist_thr = 1.0;
 
-    dlog.addText( Logger::TEAM,
-                  __FILE__": Bhv_BasicMove target=(%.1f %.1f) dist_thr=%.2f",
-                  target_point.x, target_point.y,
-                  dist_thr );
+    if(mpIntransit){
+        if(IsOccupied(agent, mpTarget, 5)){
+            OccupyHole(PrevOccupied);
+            lastRole = "BH";
+            //PrevOccupied = mpTarget;
+            return true;
+        }
 
-    agent->debugClient().addMessage( "BasicMove%.0f", dash_power );
-    agent->debugClient().setTarget( target_point );
-    agent->debugClient().addCircle( target_point, dist_thr );
+        if(AreSamePoints(mpTarget, wm.self().pos(), 0.3)){
+            mpIntransit = false;
+        }
+        
+        if(!Body_GoToPoint( mpTarget, 0.3, dash_power ).execute( agent ))
+            Body_TurnToBall().execute( agent );
+    
+        return true; 
+    }
 
-    if ( ! Body_GoToPoint( target_point, dist_thr, dash_power
-                           ).execute( agent ) )
-    {
-        Body_TurnToBall().execute( agent );
+    if( wm.existKickableTeammate() ){
+        if( ! DecideAndOccupyHole( agent, -1) )
+            Body_TurnToBall().execute( agent );
+        return true;
     }
 
     if ( wm.existKickableOpponent()
@@ -455,6 +580,281 @@ SamplePlayer::BasicMove(PlayerAgent * agent){
     }
 
     return true;
+}
+
+bool 
+SamplePlayer::DecideAndOccupyHole(PlayerAgent * agent, int target){
+    //Called when another teammate would have the ball
+    //target == -1 means a player already has the ball
+
+    const WorldModel & wm = agent->world();
+    Vector2D MyPos = wm.self().pos();
+    Vector2D BallPos = wm.ball().pos();
+    PrevOccupied = MyPos;
+    Vector2D BHPos;
+    
+    MyPos = RoundToNearestHole(MyPos);
+            
+    if(target==-1){
+        /*
+        int BHUnum = GetBHUnum(agent);
+        if(BHUnum==-1){
+            std::cout<<"No ball holder found, returning"<<std::endl;
+            return false;
+        }
+        */
+        BHPos = wm.ball().pos(); //Since the the ballholder already has the ball
+    }
+    else if(target!=wm.self().unum()){
+        BHPos = wm.ourPlayer(target)->pos();
+    }
+    else{
+        return false;
+    }
+    
+    BHPos = RoundToNearestHole(BHPos);
+
+    Vector2D BHfrontup = Vector2D(BHPos.x+10, BHPos.y-10);
+    Vector2D BHbackup = Vector2D(BHPos.x-10, BHPos.y-10);
+    Vector2D BHfrontdown = Vector2D(BHPos.x+10, BHPos.y+10);
+    Vector2D BHbackdown = Vector2D(BHPos.x-10, BHPos.y+10);
+
+    Vector2D BHfronthor = Vector2D(BHPos.x+20, BHPos.y);
+    Vector2D BHupfronthor = Vector2D(BHPos.x+20, BHPos.y-20);
+    Vector2D BHdownfronthor = Vector2D(BHPos.x+20, BHPos.y+20);
+
+    Vector2D BHbackhor = Vector2D(BHPos.x-20, BHPos.y);
+    Vector2D BHupbackhor = Vector2D(BHPos.x-20, BHPos.y-20);
+    Vector2D BHdownbackhor = Vector2D(BHPos.x-20, BHPos.y+20);
+    
+    Vector2D BHupvert = Vector2D(BHPos.x, BHPos.y-20);
+    Vector2D BHdownvert = Vector2D(BHPos.x, BHPos.y+20);
+
+    double obuffer = 1.0;
+    double cbuffer = 2.5;
+
+    bool BallInEvenLine;
+    bool BallAboveMidLine;
+    bool BallOnMidline;
+
+    int BPLine = static_cast<int>(abs(BallPos.x)/10);
+    
+    if( BPLine%2 == 0 )
+        BallInEvenLine = false;
+    else
+        BallInEvenLine = true;
+
+    if(BallPos.y < 0){
+        BallAboveMidLine = true;
+        BallOnMidline = false;
+    }
+    else{
+        if(BallPos.y == 0){
+            BallOnMidline = true;
+            BallAboveMidLine = true; //should be false once the logic for onmidline is added
+        }
+        else{
+            BallAboveMidLine = false;
+            BallOnMidline = false;
+        }
+    }
+
+    if(BallInEvenLine){
+        if(BallAboveMidLine){
+            //Level 0
+            if(AreSameNos(BallPos.x, MyPos.x, obuffer))
+                return true;
+            //Level 1
+            else if(AreSameNos(BallPos.x - 10, MyPos.x, obuffer)){
+                if(AreSamePoints(MyPos, BHbackup, obuffer)){
+                    if(!IsOccupied(this, BHfrontup, cbuffer)){
+                        OccupyHole(BHfrontup);
+                        return true;
+                    }
+                }
+                else if(AreSamePoints(MyPos, BHbackdown, obuffer)){
+                    if(!IsOccupied(this, BHfrontdown, cbuffer)){
+                        OccupyHole(BHfrontdown);
+                        return true;
+                    }
+                }
+                else{
+                    if(!IsOccupied(this, Vector2D(MyPos.x+10, MyPos.y-10), cbuffer)){
+                        OccupyHole(Vector2D(MyPos.x+10, MyPos.y-10));
+                        return true;
+                    }
+                }
+            }
+            //All other levels behind the ball holder
+            else if(MyPos.x < BallPos.x - 10)
+            {
+                if(!IsOccupied(this, Vector2D(MyPos.x+10, MyPos.y-10), cbuffer)){
+                    OccupyHole(Vector2D(MyPos.x+10, MyPos.y-10));
+                    return true;
+                }
+            }
+            //Level -1
+            else if(AreSameNos(BallPos.x+10, MyPos.x, obuffer))
+                return true;
+            //Level -2 onwards
+            else if(MyPos.x > BallPos.x + 10){
+                if(!IsOccupied(this, Vector2D(MyPos.x-10, MyPos.y-10), cbuffer)){
+                    OccupyHole(Vector2D(MyPos.x-10, MyPos.y-10));
+                    return true;
+                }
+            }
+        }
+
+        //Ball below midline
+        else{
+            //Level 0
+            if(AreSameNos(BallPos.x, MyPos.x, obuffer))
+                return true;
+            //Level 1
+            else if(AreSameNos(BallPos.x - 10, MyPos.x, obuffer)){
+                if(AreSamePoints(MyPos, BHbackup, obuffer)){
+                    if(!IsOccupied(this, BHfrontup, cbuffer)){
+                        OccupyHole(BHfrontup);
+                        return true;
+                    }
+                }
+                else if(AreSamePoints(MyPos, BHbackdown, obuffer)){
+                    if(!IsOccupied(this, BHfrontdown, cbuffer)){
+                        OccupyHole(BHfrontdown);
+                        return true;
+                    }
+                }
+                else{
+                    if(!IsOccupied(this, Vector2D(MyPos.x+10, MyPos.y+10), cbuffer)){
+                        OccupyHole(Vector2D(MyPos.x+10, MyPos.y+10));
+                        return true;
+                    }
+                }
+            }
+            //All other levels behind the ball holder
+            else if(MyPos.x < BallPos.x - 10)
+            {
+                if(!IsOccupied(this, Vector2D(MyPos.x+10, MyPos.y+10), cbuffer)){
+                    OccupyHole(Vector2D(MyPos.x+10, MyPos.y+10));
+                    return true;
+                }
+            }
+            //Level -1
+            else if(AreSameNos(BallPos.x+10, MyPos.x, obuffer))
+                return true;
+            //Level -2 onwards
+            else if(MyPos.x > BallPos.x + 10){
+                if(!IsOccupied(this, Vector2D(MyPos.x-10, MyPos.y+10), cbuffer)){
+                    OccupyHole(Vector2D(MyPos.x-10, MyPos.y+10));
+                    return true;
+                }
+            }
+        }
+    }
+    //Ball in odd line
+    else{
+        if(BallAboveMidLine){
+            //Level 0
+            if(AreSameNos(BallPos.x, MyPos.x, obuffer))
+                return true;
+            //Level 1
+            else if(AreSameNos(BallPos.x - 10, MyPos.x, obuffer)){
+                if(AreSamePoints(MyPos, BHbackup, obuffer)){
+                    if(!IsOccupied(this, BHfrontup, cbuffer)){
+                        OccupyHole(BHfrontup);
+                        return true;
+                    }
+                }
+                else if(AreSamePoints(MyPos, BHbackdown, obuffer)){
+                    if(!IsOccupied(this, BHfrontdown, cbuffer)){
+                        OccupyHole(BHfrontdown);
+                        return true;
+                    }
+                }
+                else{
+                    if(!IsOccupied(this, Vector2D(MyPos.x+10, MyPos.y-10), cbuffer)){
+                        OccupyHole(Vector2D(MyPos.x+10, MyPos.y-10));
+                        return true;
+                    }
+                }
+            }
+            //All other levels behind the ball holder
+            else if(MyPos.x < BallPos.x - 10)
+            {
+                if(!IsOccupied(this, Vector2D(MyPos.x+10, MyPos.y-10), cbuffer)){
+                    OccupyHole(Vector2D(MyPos.x+10, MyPos.y-10));
+                    return true;
+                }
+            }
+            //Level -1
+            else if(AreSameNos(BallPos.x+10, MyPos.x, obuffer))
+                return true;
+            //Level -2 onwards
+            else if(MyPos.x > BallPos.x + 10){
+                if(!IsOccupied(this, Vector2D(MyPos.x-10, MyPos.y-10), cbuffer)){
+                    OccupyHole(Vector2D(MyPos.x-10, MyPos.y-10));
+                    return true;
+                }
+            }
+        }
+
+        //Ball below midline
+        else if(!BallOnMidline){
+            //Level 0
+            if(AreSameNos(BallPos.x, MyPos.x, obuffer))
+                return true;
+            //Level 1
+            else if(AreSameNos(BallPos.x - 10, MyPos.x, obuffer)){
+                if(AreSamePoints(MyPos, BHbackup, obuffer)){
+                    if(!IsOccupied(this, BHfrontup, cbuffer)){
+                        OccupyHole(BHfrontup);
+                        return true;
+                    }
+                }
+                else if(AreSamePoints(MyPos, BHbackdown, obuffer)){
+                    if(!IsOccupied(this, BHfrontdown, cbuffer)){
+                        OccupyHole(BHfrontdown);
+                        return true;
+                    }
+                }
+                else{
+                    if(!IsOccupied(this, Vector2D(MyPos.x+10, MyPos.y+10), cbuffer)){
+                        OccupyHole(Vector2D(MyPos.x+10, MyPos.y+10));
+                        return true;
+                    }
+                }
+            }
+            //All other levels behind the ball holder
+            else if(MyPos.x < BallPos.x - 10)
+            {
+                if(!IsOccupied(this, Vector2D(MyPos.x+10, MyPos.y+10), cbuffer)){
+                    OccupyHole(Vector2D(MyPos.x+10, MyPos.y+10));
+                    return true;
+                }
+            }
+            //Level -1
+            else if(AreSameNos(BallPos.x+10, MyPos.x, obuffer))
+                return true;
+            //Level -2 onwards
+            else if(MyPos.x > BallPos.x + 10){
+                if(!IsOccupied(this, Vector2D(MyPos.x-10, MyPos.y+10), cbuffer)){
+                    OccupyHole(Vector2D(MyPos.x-10, MyPos.y+10));
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+void 
+SamplePlayer::OccupyHole(Vector2D target){
+    if(abs(target.x)<55 && abs(target.y)<35){
+        mpIntransit = true;
+        mpTarget = target;
+        IsOccupying = true;
+    }
 }
 
 double 
@@ -528,20 +928,45 @@ SamplePlayer::RoundToNearestHole(Vector2D P){
 
 int
 SamplePlayer::GetBHUnum(PlayerAgent * agent){
+    //std::cout<<"entering bhunum - "<<agent->world().self().unum()<<std::endl;
+
     const WorldModel & wm = agent->world();
+    //std::cout<<"creating wm object - "<<agent->world().self().unum()<<std::endl;
+
     //if(!wm.existKickableTeammate())
       //return -1;
     for(int i=1; i<=11; i++){
-      if(isKickable(agent, i))
+      if(isKickable(agent, i)){
+       // std::cout<<"returning from getbhunum - "<<agent->world().self().unum()<<std::endl;
+        
         return i;
+        }
     }
+        //std::cout<<"returning from getbhunum - "<<agent->world().self().unum()<<std::endl;
+
     return -1;
 }
 
 bool
 SamplePlayer::isKickable(PlayerAgent * agent, int unum){
+        //std::cout<<"entering iskickable - "<<agent->world().self().unum()<<std::endl;
+
     const WorldModel & wm = agent->world();
-    return (wm.ourPlayer(unum)->distFromBall() < ServerParam::i().defaultKickableArea());
+    //std::cout<<"created wm - "<<agent->world().self().unum()<<std::endl;
+
+    if(wm.ourPlayer(unum)!=NULL){
+        if(wm.ourPlayer(unum)->distFromBall() < ServerParam::i().defaultKickableArea()){
+            //std::cout<<"returning from isKickable"<<std::endl;
+            return true;
+        }
+        //std::cout<<"returning from isKickable"<<std::endl;
+        return false;
+    }
+    else{
+        //std::cout<<"returning from isKickable"<<std::endl;
+        return false;
+    }
+    //return (wm.ourPlayer(unum)->distFromBall() < ServerParam::i().defaultKickableArea());
 }
 
 bool 
@@ -549,149 +974,33 @@ SamplePlayer::AreSamePoints(Vector2D A, Vector2D B, double buffer){
     //Check if and b are the same points +/- buffer
     if(A.dist(B)<buffer)
         return true;
-    else
-        return false;
+    return false;
+}
+
+bool
+SamplePlayer::AreSameNos(double A, double B, double buffer){
+    if( abs(A-B) < buffer)
+        return true;
+    return false;
 }
 
 bool
 SamplePlayer::IsOccupied(PlayerAgent * agent, Vector2D target, double buffer){
     //Returns true if target is occupied by a player
+    Body_TurnToPoint( target ).execute( agent );
+    Neck_TurnToPoint( target ).execute( agent );
     const WorldModel & wm = agent->world();
     for(int i=4; i<=11; i++){
-        Vector2D player_pos = wm.ourPlayer(i)->pos();
-        if( AreSamePoints(player_pos, target, buffer) && i!=wm.self().unum() )
-            return true;
+        if(wm.ourPlayer(i)!=NULL){
+            Vector2D player_pos = wm.ourPlayer(i)->pos();
+            if( AreSamePoints(player_pos, target, buffer) && i!=wm.self().unum() )
+                return true;
+        }
     }
     return false;
 }
 
-void 
-SamplePlayer::DecideAndOccupyHole(PlayerAgent * agent, int target){
-    //Called when another teammate would have the ball
-    //target == -1 means a player already has the ball
-    const WorldModel & wm = agent->world();
-        
-    Vector2D BHPos;
 
-    Vector2D MyPos = wm.self().pos();
-    MyPos = RoundToNearestHole(MyPos);
-            
-    if(target==-1){
-        int BHUnum = GetBHUnum(agent);
-        if(BHUnum==-1){
-            std::cout<<"No ball holder found, returning"<<std::endl;
-            return;
-        }
-        BHPos = wm.ourPlayer(BHUnum)->pos();
-    }
-    else if(target!=wm.self().unum()){
-        BHPos = wm.ourPlayer(target)->pos();
-    }
-    else
-        return;
-    
-    BHPos = RoundToNearestHole(BHPos);
-
-    Vector2D BHfrontup = Vector2D(BHPos.x+10, BHPos.y-10);
-    Vector2D BHbackup = Vector2D(BHPos.x-10, BHPos.y-10);
-    Vector2D BHfrontdown = Vector2D(BHPos.x+10, BHPos.y+10);
-    Vector2D BHbackdown = Vector2D(BHPos.x-10, BHPos.y+10);
-
-    Vector2D BHfronthor = Vector2D(BHPos.x+20, BHPos.y);
-    Vector2D BHupfronthor = Vector2D(BHPos.x+20, BHPos.y-20);
-    Vector2D BHdownfronthor = Vector2D(BHPos.x+20, BHPos.y+20);
-
-    Vector2D BHbackhor = Vector2D(BHPos.x-20, BHPos.y);
-    Vector2D BHupbackhor = Vector2D(BHPos.x-20, BHPos.y-20);
-    Vector2D BHdownbackhor = Vector2D(BHPos.x-20, BHPos.y+20);
-    
-    Vector2D BHupvert = Vector2D(BHPos.x, BHPos.y-20);
-    Vector2D BHdownvert = Vector2D(BHPos.x, BHPos.y+20);
-
-    double obuffer = 2.5;
-
-    /*
-    mpAgent->Turn(90);
-    while(!mpObserver->WaitForNewSight());
-    mpAgent->Turn(90);
-    while(!mpObserver->WaitForNewSight());
-    mpAgent->Turn(90);
-    while(!mpObserver->WaitForNewSight());
-    mpAgent->Turn(90);
-    while(!mpObserver->WaitForNewSight());
-    */        
-
-    //TODO: Add conditions for look left/right before occupying
-
-    //A. Side of BH
-    if(AreSamePoints(MyPos, BHupvert, 1)){
-        if(!IsOccupied(agent, BHfrontup, obuffer)){
-            OccupyHole(BHfrontup);
-            return;
-        }
-    }
-    if(AreSamePoints(MyPos, BHdownvert, 1)){
-        if(!IsOccupied(agent, BHfrontdown, obuffer)){
-            OccupyHole(BHfrontdown);
-            return;
-        }
-    }
-
-    //B. Just behind BH
-    if(AreSamePoints(MyPos, BHbackup, 1)){
-        std::cout<<"im backup"<<std::endl;
-        if(!IsOccupied(agent, BHupvert, obuffer)){
-            std::cout<<" i'm covering upvert"<<std::endl;
-            OccupyHole(BHupvert);
-            return;
-        }
-    }
-    if(AreSamePoints(MyPos, BHbackdown, 1)){
-        std::cout<<"im backdown"<<std::endl;
-        if(!IsOccupied(agent, BHdownvert, obuffer)){
-            std::cout<<" i'm covering downvert"<<std::endl;
-            OccupyHole(BHdownvert);
-            return;
-        }
-    }
-
-    //C. Far behind
-    if(AreSamePoints(MyPos, BHupbackhor, 1)){
-        //std::cout<<"my player info"<<mpAgent-
-        if(!IsOccupied(agent, BHbackup, obuffer)){
-            OccupyHole(BHbackup);
-            return;
-        }
-        //else
-            //std::cout<<"player "<<mpAgent->GetSelfUnum()<<"thinks "<<"BHbackup occupied by"<<GetOccupierUnum(BHbackup, obuffer)<<std::endl;
-    }
-    if(AreSamePoints(MyPos, BHdownbackhor, 1)){
-        if(!IsOccupied(agent, BHbackdown, obuffer)){
-            OccupyHole(BHbackdown);
-            return;
-        }
-    }
-    if(AreSamePoints(MyPos, BHbackhor, 1)){
-        if(!IsOccupied(agent, BHbackup, obuffer)&&!IsOccupied(agent, BHupbackhor, obuffer)){
-            OccupyHole(BHbackup);
-            return;
-        }
-        if(!IsOccupied(agent, BHbackdown, obuffer)&&!IsOccupied(agent, BHdownbackhor, obuffer)){
-            OccupyHole(BHbackdown);
-            return;
-        }
-    }
-}
-
-void 
-SamplePlayer::OccupyHole(Vector2D target){
-    //Dash to target
-    //while(!AreSamePoints(mpAgent->GetSelf().GetPos(),target,2))
-        //Dasher::instance().GoToPoint(*mpAgent, target, 0.3, 100, true, false);
-    mpIntransit = true;
-    mpTarget = target;
-    IsOccupying = true;
-}
 
 /*-------------------------------------------------------------------*/
 /*!
@@ -904,7 +1213,7 @@ SamplePlayer::doPreprocess()
     //
     // freezed by tackle effect
     //
-    if ( wm.self().isFrozen() )
+        if ( wm.self().isFrozen() )
     {
         dlog.addText( Logger::TEAM,
                       __FILE__": tackle wait. expires= %d",
@@ -914,6 +1223,7 @@ SamplePlayer::doPreprocess()
         this->setNeckAction( new Neck_TurnToBallOrScan() );
         return true;
     }
+    
 
     //
     // BeforeKickOff or AfterGoal. jump to the initial position
@@ -932,6 +1242,7 @@ SamplePlayer::doPreprocess()
     //
     // self localization error
     //
+    
     if ( ! wm.self().posValid() )
     {
         dlog.addText( Logger::TEAM,
@@ -939,10 +1250,12 @@ SamplePlayer::doPreprocess()
         Bhv_Emergency().execute( this ); // includes change view
         return true;
     }
+    
 
     //
     // ball localization error
     //
+    
     const int count_thr = ( wm.self().goalie()
                             ? 10
                             : 5 );
@@ -956,6 +1269,7 @@ SamplePlayer::doPreprocess()
         Bhv_NeckBodyToBall().execute( this );
         return true;
     }
+    
 
     //
     // set default change view
@@ -966,16 +1280,24 @@ SamplePlayer::doPreprocess()
     //
     // check shoot chance
     //
+    
     if ( doShoot() )
     {
+        std::cout<<"doShoot"<<std::endl;
+        std::cout<<"*******************************************************************************"<<std::endl;
+
         return true;
     }
+    
 
     //
     // check queued action
     //
+    
     if ( this->doIntention() )
-    {
+    {   
+        std::cout<<"doIntention------------------------------------------------------------"<<std::endl;
+        std::cout<<"*******************************************************************************"<<std::endl;
         dlog.addText( Logger::TEAM,
                       __FILE__": do queued intention" );
         return true;
@@ -984,18 +1306,26 @@ SamplePlayer::doPreprocess()
     //
     // check simultaneous kick
     //
+    
     if ( doForceKick() )
-    {
+    {   
+        std::cout<<"doForceKick--------------------------------------------------------------"<<std::endl;
+        std::cout<<"*******************************************************************************"<<std::endl;
         return true;
     }
+    
 
     //
     // check pass message
     //
+    
     if ( doHeardPassReceive() )
     {
+        std::cout<<"doHeardPassReceive------------------------------------------------------"<<std::endl;
+        std::cout<<"*******************************************************************************"<<std::endl;
         return true;
     }
+    
 
     return false;
 }
@@ -1209,3 +1539,76 @@ SamplePlayer::createActionGenerator() const
 
     return ActionGenerator::ConstPtr( g );
 }
+
+/*
+
+    //A. Side of BH
+
+    if(true){
+        if(AreSamePoints(MyPos, BHupvert, 1)){
+            lastRole = "UV";
+            if(!IsOccupied(agent, BHfrontup, obuffer)){
+                OccupyHole(BHfrontup);
+                lastRole = "FU";
+                return true;
+            }
+        }
+        if(AreSamePoints(MyPos, BHdownvert, 1)){
+            lastRole = "DV";
+            if(!IsOccupied(agent, BHfrontdown, obuffer)){
+                OccupyHole(BHfrontdown);
+                lastRole = "FD";
+                return true;
+            }
+        }
+
+        //B. Just behind BH
+        if(AreSamePoints(MyPos, BHbackup, 1)){
+            lastRole = "BU";
+            if(!IsOccupied(agent, BHupvert, obuffer)){
+                OccupyHole(BHupvert);
+                lastRole = "UV";
+                return true;
+            }
+        }
+        if(AreSamePoints(MyPos, BHbackdown, 1)){
+            lastRole = "BD";
+            if(!IsOccupied(agent, BHdownvert, obuffer)){
+                OccupyHole(BHdownvert);
+                lastRole = "DV";
+                return true;
+            }
+        }
+
+        //C. Far behind
+        if(AreSamePoints(MyPos, BHupbackhor, 1)){
+            lastRole = "UBH";
+            if(!IsOccupied(agent, BHbackup, obuffer)){
+                OccupyHole(BHbackup);
+                lastRole = "BU";
+                return true;
+            }
+        }
+        if(AreSamePoints(MyPos, BHdownbackhor, 1)){
+            lastRole = "DBH";
+            if(!IsOccupied(agent, BHbackdown, obuffer)){
+                OccupyHole(BHbackdown);
+                lastRole = "BD";
+                return true;
+            }
+        }
+        if(AreSamePoints(MyPos, BHbackhor, 1)){
+            lastRole = "BH";
+            if(!IsOccupied(agent, BHbackup, obuffer)&&!IsOccupied(agent, BHupbackhor, obuffer)){
+                OccupyHole(BHbackup);
+                lastRole = "BU";
+                return true;
+            }
+            if(!IsOccupied(agent, BHbackdown, obuffer)&&!IsOccupied(agent, BHdownbackhor, obuffer)){
+                OccupyHole(BHbackdown);
+                lastRole = "BD";
+                return true;
+            }
+        }
+    }
+*/

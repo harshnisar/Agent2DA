@@ -55,6 +55,8 @@
 
 #include "neck_offensive_intercept_neck.h"
 
+#include <string>
+
 class SamplePlayer
     : public rcsc::PlayerAgent {
 private:
@@ -111,8 +113,12 @@ public:
     bool mpIntransit = false;
     rcsc::Vector2D mpTarget = rcsc::Vector2D(0,0);
     bool IsOccupying = false;
+    rcsc::Vector2D PrevOccupied;
 
-    bool executeSampleRole( rcsc::PlayerAgent * agent );
+    std::string lastRole = "undecided";
+
+    bool 
+    executeSampleRole( rcsc::PlayerAgent * agent );
 
     bool
     BasicMove( rcsc::PlayerAgent * agent );
@@ -141,11 +147,20 @@ public:
     bool
     IsOccupied(rcsc::PlayerAgent * agent, rcsc::Vector2D target, double buffer);
 
-    void
+    bool
+    PassToBestPlayer(rcsc::PlayerAgent * agent);
+
+    bool
     DecideAndOccupyHole(rcsc::PlayerAgent * agent, int target);
 
     void
     OccupyHole(rcsc::Vector2D target);
+
+    bool
+    PassPlayersAvailable(rcsc::PlayerAgent * agent);
+
+    bool
+    AreSameNos(double A, double B, double buffer);
 
 private:
     double getDashPower( const rcsc::PlayerAgent * agent );
