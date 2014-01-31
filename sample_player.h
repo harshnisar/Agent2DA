@@ -117,6 +117,12 @@ public:
 
     std::string lastRole = "undecided";
 
+    int
+    LastBH = -1;
+
+    bool
+    FoundNewBH = false;
+
     bool 
     executeSampleRole( rcsc::PlayerAgent * agent );
 
@@ -146,6 +152,9 @@ public:
 
     bool
     IsOccupied(rcsc::PlayerAgent * agent, rcsc::Vector2D target, double buffer);
+
+    int
+    GetOccupierUnum(rcsc::PlayerAgent * agent, rcsc::Vector2D target, double buffer);
 
     bool
     PassToBestPlayer(rcsc::PlayerAgent * agent);
