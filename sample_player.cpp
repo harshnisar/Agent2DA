@@ -29,6 +29,8 @@
 #endif
 
 #include "sample_player.h"
+#include "bhv_basic_move.h"
+
 
 #include "strategy.h"
 #include "field_analyzer.h"
@@ -311,10 +313,13 @@ SamplePlayer::actionImpl()
     if ( world().gameMode().type() == GameMode::KickOff_ )
     {   
         mpIntransit = false;
+        OpponentHasBall = false;
+        FoundNewBH = false;
         if(wm.self().unum()==10){
             mpIntransit = true;
             mpTarget = wm.ball().pos();
         }
+
         bool kickable = this->world().self().isKickable();
         if ( this->world().existKickableTeammate()
              && this->world().teammatesFromBall().front()->distFromBall()
@@ -376,14 +381,14 @@ SamplePlayer::PassPlayersAvailable( PlayerAgent * agent ){
     
     //TODO: Return true only if pass is advantageous
 
-    if( IsOccupied(agent, frontup, buffer)||
-        IsOccupied(agent, frontdown, buffer)//||
-        //IsOccupied(agent, backup, buffer)||
-        //IsOccupied(agent, backdown, buffer)||
-        //IsOccupied(agent, fronthor, buffer)||
-        //IsOccupied(agent, upvert, buffer)||
-        //IsOccupied(agent, downvert, buffer)||
-        //IsOccupied(agent, backhor, buffer)
+    if( IsOccupiedForKick(agent, frontup, buffer)||
+        IsOccupiedForKick(agent, frontdown, buffer)||
+        IsOccupiedForKick(agent, backup, buffer)||
+        IsOccupiedForKick(agent, backdown, buffer)||
+        IsOccupiedForKick(agent, fronthor, buffer)||
+        IsOccupiedForKick(agent, upvert, buffer)||
+        IsOccupiedForKick(agent, downvert, buffer)||
+        IsOccupiedForKick(agent, backhor, buffer)
         ){
         return true;
     }   
@@ -412,29 +417,29 @@ SamplePlayer::PassToBestPlayer( PlayerAgent * agent ){
     
     double buffer = 2.5;
 
-    if(IsOccupied(agent, frontup, buffer))
+    if(IsOccupiedForKick(agent, frontup, buffer))
         return Body_KickOneStep( frontup, ServerParam::i().ballSpeedMax() ).execute( agent );
-    if(IsOccupied(agent, frontdown, buffer))
+    if(IsOccupiedForKick(agent, frontdown, buffer))
         return Body_KickOneStep( frontdown, ServerParam::i().ballSpeedMax() ).execute( agent );
    
-    /*
-    if(IsOccupied(agent, backup, buffer))
+    
+    if(IsOccupiedForKick(agent, backup, buffer))
         return Body_KickOneStep( backup, ServerParam::i().ballSpeedMax() ).execute( agent );
-    if(IsOccupied(agent, backdown, buffer))
+    if(IsOccupiedForKick(agent, backdown, buffer))
         return Body_KickOneStep( backdown, ServerParam::i().ballSpeedMax() ).execute( agent );
     
-
-    if(IsOccupied(agent, fronthor, buffer))
+    
+    if(IsOccupiedForKick(agent, fronthor, buffer))
         return Body_KickOneStep( fronthor, ServerParam::i().ballSpeedMax() ).execute( agent );
     
-    if(IsOccupied(agent, upvert, buffer))
+    if(IsOccupiedForKick(agent, upvert, buffer))
         return Body_KickOneStep( upvert, ServerParam::i().ballSpeedMax() ).execute( agent );
-    if(IsOccupied(agent, downvert, buffer))
+    if(IsOccupiedForKick(agent, downvert, buffer))
         return Body_KickOneStep( downvert, ServerParam::i().ballSpeedMax() ).execute( agent );
 
-    if(IsOccupied(agent, backhor, buffer))
+    if(IsOccupiedForKick(agent, backhor, buffer))
         return Body_KickOneStep( backhor, ServerParam::i().ballSpeedMax() ).execute( agent );
-    */
+    
 
     return false;
 }
@@ -450,19 +455,27 @@ SamplePlayer::executeSampleRole( PlayerAgent * agent )
         kickable = false;
     }
 
+    if(agent->world().existKickableTeammate())
+        OpponentHasBall = false;
+    else if(agent->world().existKickableOpponent())
+        OpponentHasBall = true;
+
     if ( kickable )
     {
         //doKick( agent );
         if(PassPlayersAvailable( agent ))
             //Body_HoldBall().execute( agent );
-            PassToBestPlayer(this);
-            //Bhv_BasicOffensiveKick().execute( agent );
+            //PassToBestPlayer(this);
+            Bhv_BasicOffensiveKick().execute( agent );
         else
             Body_HoldBall().execute( agent );
     }
     else
     {
-        doMove( agent );
+        if(!OpponentHasBall)
+            doMove( agent );
+        else
+            Bhv_BasicMove().execute(agent);
     }
 
     return true;
@@ -541,8 +554,6 @@ SamplePlayer::BasicMove(PlayerAgent * agent){
          )
     {
     
-        dlog.addText( Logger::TEAM,
-                      __FILE__": intercept" );
         Body_Intercept().execute( agent );
         agent->setNeckAction( new Neck_OffensiveInterceptNeck() );
 
@@ -550,6 +561,7 @@ SamplePlayer::BasicMove(PlayerAgent * agent){
     }
     
     //Check if ball has been passed
+    /*
     if(wm.existKickableTeammate()){
         int CurrentBH = GetBHUnum(agent);
         if(CurrentBH!=LastBH && CurrentBH!=-1)
@@ -558,31 +570,33 @@ SamplePlayer::BasicMove(PlayerAgent * agent){
             FoundNewBH = false;
         LastBH = CurrentBH;
     }
-
-    const Vector2D target_point = Vector2D(0,0);//Strategy::i().getPosition( wm.self().int() );
+    */
+    
+    //const Vector2D target_point = Vector2D(0,0);//Strategy::i().getPosition( wm.self().int() );
     const double dash_power = ServerParam::i().maxDashPower();//Strategy::get_normal_dash_power( wm );
 
     double dist_thr = wm.ball().distFromSelf() * 0.1;
     if ( dist_thr < 1.0 ) dist_thr = 1.0;
 
+    
     if(mpIntransit && !FoundNewBH){
+        
         if(IsOccupied(agent, mpTarget, 5)){
             OccupyHole(PrevOccupied);
-            //lastRole = "BH";
-            //PrevOccupied = mpTarget;
             return true;
         }
-
+        
         if(AreSamePoints(mpTarget, wm.self().pos(), 0.3)){
             mpIntransit = false;
             return true;
         }
         
-        if(!Body_GoToPoint( mpTarget, 0.3, dash_power ).execute( agent ))
-            Body_TurnToPoint(mpTarget).execute( agent );
+        Body_GoToPoint( mpTarget, 0.3, dash_power, 3 ).execute( agent );
+        //Body_TurnToPoint(mpTarget).execute( agent );
     
         return true; 
     }
+    
 
     //Decide and Occupy hole
     if( wm.existKickableTeammate() ){
@@ -656,7 +670,7 @@ SamplePlayer::DecideAndOccupyHole(PlayerAgent * agent, int target){
     Vector2D BHdownvert = Vector2D(BHPos.x, BHPos.y+20);
 
     double obuffer = 2.5;
-    double cbuffer = 0.5;
+    double cbuffer = 2.5;
 
     bool BallInEvenLine;
     bool BallAboveMidLine;
@@ -853,14 +867,14 @@ SamplePlayer::DecideAndOccupyHole(PlayerAgent * agent, int target){
                             &&
                            !IsOccupied(this, Vector2D(MyPos.x+10, MyPos.y-10), cbuffer))
                         {
-                            OccupyHole(Vector2D(MyPos.x+10, MyPos.y-10));
+                            //OccupyHole(Vector2D(MyPos.x+10, MyPos.y-10));
                             return true;
                         }
                         else if(!IsOccupied(this, Vector2D(MyPos.x, MyPos.y+20), cbuffer)
                             &&
                            !IsOccupied(this, Vector2D(MyPos.x+10, MyPos.y+10), cbuffer))
                         {
-                            OccupyHole(Vector2D(MyPos.x+10, MyPos.y+10));
+                            //OccupyHole(Vector2D(MyPos.x+10, MyPos.y+10));
                             return true;
                         }
 
@@ -904,14 +918,14 @@ SamplePlayer::DecideAndOccupyHole(PlayerAgent * agent, int target){
                             &&
                            !IsOccupied(this, Vector2D(MyPos.x-10, MyPos.y-10), cbuffer))
                         {
-                            OccupyHole(Vector2D(MyPos.x-10, MyPos.y-10));
+                            //OccupyHole(Vector2D(MyPos.x-10, MyPos.y-10));
                             return true;
                         }
                         if(!IsOccupied(this, Vector2D(MyPos.x, MyPos.y+20), cbuffer)
                             &&
                            !IsOccupied(this, Vector2D(MyPos.x-10, MyPos.y+10), cbuffer))
                         {
-                            OccupyHole(Vector2D(MyPos.x-10, MyPos.y+10));
+                            //OccupyHole(Vector2D(MyPos.x-10, MyPos.y+10));
                             return true;
                         }
 
@@ -1024,12 +1038,25 @@ SamplePlayer::DecideAndOccupyHole(PlayerAgent * agent, int target){
                 }
             }
         }
-    }    
+    }
+    
+    if(MyPos.y > BallPos.y + 35){
+        if(!IsOccupied(this, Vector2D(MyPos.x, MyPos.y-20), cbuffer))
+            OccupyHole(Vector2D(MyPos.x, MyPos.y-20));
+    }
+
+    if(MyPos.y < BallPos.y - 35){
+        if(!IsOccupied(this, Vector2D(MyPos.x, MyPos.y+20), cbuffer))
+            OccupyHole(Vector2D(MyPos.x, MyPos.y+20));
+    }
+    
+
     return false;
 }
 
 void 
 SamplePlayer::OccupyHole(Vector2D target){
+    target = RoundToNearestHole(target);
     if(abs(target.x)<55 && abs(target.y)<35){
         mpIntransit = true;
         mpTarget = target;
@@ -1150,6 +1177,28 @@ bool
 SamplePlayer::IsOccupied(PlayerAgent * agent, Vector2D target, double buffer){
     //Returns true if target is occupied by a player
     //Body_TurnToPoint( target ).execute( agent );
+    //wait for new sight
+    if(abs(target.x)>55 || abs(target.y)>35)
+        return true;
+    Neck_TurnToPoint( target ).execute( agent );
+    const WorldModel & wm = agent->world();
+    for(int i=4; i<=11; i++){
+        if(wm.ourPlayer(i)!=NULL){
+            Vector2D player_pos = wm.ourPlayer(i)->pos();
+            if( AreSamePoints(player_pos, target, buffer) && i!=wm.self().unum() )
+                return true;
+        }
+    }
+    return false;
+}
+
+bool
+SamplePlayer::IsOccupiedForKick(PlayerAgent * agent, Vector2D target, double buffer){
+    //Returns true if target is occupied by a player
+    //Body_TurnToPoint( target ).execute( agent );
+    //wait for new sight
+    if(abs(target.x)>55 || abs(target.y)>35)
+        return false;
     Neck_TurnToPoint( target ).execute( agent );
     const WorldModel & wm = agent->world();
     for(int i=4; i<=11; i++){
@@ -1420,6 +1469,7 @@ SamplePlayer::doPreprocess()
     //
     // self localization error
     //
+    /*
     
     if ( ! wm.self().posValid() )
     {
@@ -1428,12 +1478,13 @@ SamplePlayer::doPreprocess()
         Bhv_Emergency().execute( this ); // includes change view
         return true;
     }
-    
+    */
 
     //
     // ball localization error
     //
     
+    /*
     const int count_thr = ( wm.self().goalie()
                             ? 10
                             : 5 );
@@ -1447,6 +1498,7 @@ SamplePlayer::doPreprocess()
         Bhv_NeckBodyToBall().execute( this );
         return true;
     }
+    */
     
 
     //
@@ -1472,6 +1524,7 @@ SamplePlayer::doPreprocess()
     // check queued action
     //
     
+    /*
     if ( this->doIntention() )
     {   
         std::cout<<"doIntention------------------------------------------------------------"<<std::endl;
@@ -1491,7 +1544,7 @@ SamplePlayer::doPreprocess()
         std::cout<<"*******************************************************************************"<<std::endl;
         return true;
     }
-    
+    */
 
     //
     // check pass message

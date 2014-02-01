@@ -110,12 +110,26 @@ protected:
 
 public:
 
-    bool mpIntransit = false;
-    rcsc::Vector2D mpTarget = rcsc::Vector2D(0,0);
-    bool IsOccupying = false;
-    rcsc::Vector2D PrevOccupied;
+    bool 
+    mpIntransit = false;
+    
+    rcsc::Vector2D 
+    mpTarget = rcsc::Vector2D(0,0);
+    
+    bool 
+    IsOccupying = false;
+    
+    rcsc::Vector2D 
+    PrevOccupied;
+    
+    bool 
+    Turned = false;
 
-    std::string lastRole = "undecided";
+    bool 
+    OpponentHasBall = false;
+
+    std::string 
+    lastRole = "undecided";
 
     int
     LastBH = -1;
@@ -152,6 +166,9 @@ public:
 
     bool
     IsOccupied(rcsc::PlayerAgent * agent, rcsc::Vector2D target, double buffer);
+
+    bool
+    IsOccupiedForKick(rcsc::PlayerAgent * agent, rcsc::Vector2D target, double buffer);
 
     int
     GetOccupierUnum(rcsc::PlayerAgent * agent, rcsc::Vector2D target, double buffer);

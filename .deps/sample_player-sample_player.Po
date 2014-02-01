@@ -416,7 +416,7 @@ sample_player-sample_player.o: sample_player.cpp ../config.h \
  /usr/local/include/rcsc/action/neck_turn_to_low_conf_teammate.h \
  /usr/local/include/rcsc/common/logger.h \
  /usr/local/include/rcsc/geom/sector_2d.h neck_offensive_intercept_neck.h \
- ../src/chain_action/field_analyzer.h \
+ bhv_basic_move.h ../src/chain_action/field_analyzer.h \
  /usr/local/include/rcsc/geom/voronoi_diagram.h \
  /usr/local/include/rcsc/geom/voronoi_diagram_original.h \
  /usr/local/include/rcsc/geom/ray_2d.h \
@@ -1756,6 +1756,8 @@ bhv_basic_tackle.h:
 /usr/local/include/rcsc/geom/sector_2d.h:
 
 neck_offensive_intercept_neck.h:
+
+bhv_basic_move.h:
 
 ../src/chain_action/field_analyzer.h:
 
